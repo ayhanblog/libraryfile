@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت کتاب‌ها</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazir&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Vazir', sans-serif;
+        }
+        body {
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 12px;
+            width: 70%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+        input:focus {
+            background-color: #fff;
+            outline: none;
+            border-color: #007bff;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+            margin: 0 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .delete-btn {
+            padding: 8px 12px;
+            font-size: 14px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        #bookList {
+            margin-top: 20px;
+            text-align: right;
+            font-size: 16px;
+        }
+        #bookList ul {
+            list-style: none;
+            padding: 0;
+        }
+        #bookList li {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>مدیریت کتاب‌ها</h1>
+        <input type="text" id="newBook" placeholder="نام کتاب جدید را وارد کنید">
+        <button onclick="addBook()">اضافه کردن</button>
+        <button onclick="window.location.href='index.html'">بازگشت به صفحه اصلی</button>
+        <button onclick="window.location.href='borrowers.html'">مدیریت افراد قرض‌گیرنده</button>
+        <div id="bookList"></div>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        let books = JSON.parse(localStorage.getItem("bookList")) || [
+            "ریاضیات آسان", "ریاضی گسسته", "فارسی هفتم", "ملت عشق", 
+            "شازده کوچولو", "قدرت حال", "کیمیاگر", "هنر شفاف اندیشیدن"
+        ];
+
+        function displayBooks() {
+            const bookListElement = document.getElementById("bookList");
+            if (books.length === 0) {
+                bookListElement.textContent = "هیچ کتابی ثبت نشده است.";
+            } else {
+                bookListElement.innerHTML = `<ul>${books.map((book, index) => 
+                    `<li>
+                        ${book}
+                        <button class="delete-btn" onclick="confirmDelete(${index})">حذف</button>
+                    </li>`
+                ).join("")}</ul>`;
+            }
+        }
+
+        function addBook() {
+            const newBook = document.getElementById("newBook").value.trim();
+            const resultElement = document.getElementById("result");
+
+            if (!newBook) {
+                resultElement.textContent = "لطفاً نام کتاب را وارد کنید!";
+                return;
+            }
+
+            if (books.includes(newBook)) {
+                resultElement.textContent = "❌ این کتاب قبلاً اضافه شده است!";
+                return;
+            }
+
+            books.push(newBook);
+            localStorage.setItem("bookList", JSON.stringify(books));
+            resultElement.textContent = "✅ کتاب با موفقیت اضافه شد!";
+            document.getElementById("newBook").value = "";
+            displayBooks();
+        }
+
+        function confirmDelete(index) {
+            const confirmed = confirm(`آیا مطمئن هستید که می‌خواهید کتاب "${books[index]}" را حذف کنید؟`);
+            if (confirmed) {
+                books.splice(index, 1);
+                localStorage.setItem("bookList", JSON.stringify(books));
+                displayBooks();
+                document.getElementById("result").textContent = "✅ کتاب با موفقیت حذف شد.";
+            }
+        }
+
+        displayBooks();
+
+        document.getElementById("newBook").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                addBook();
+            }
+        });
+    </script>
+</body>
+</html>

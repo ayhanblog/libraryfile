@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت افراد قرض‌گیرنده</title>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazir&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Vazir', sans-serif;
+        }
+        body {
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 12px;
+            width: 60%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+        input:focus {
+            background-color: #fff;
+            outline: none;
+            border-color: #007bff;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+            margin: 0 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .return-btn {
+            padding: 8px 12px;
+            font-size: 14px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .return-btn:hover {
+            background-color: #218838;
+        }
+        #borrowerList {
+            margin-top: 20px;
+            text-align: right;
+            font-size: 16px;
+        }
+        #borrowerList ul {
+            list-style: none;
+            padding: 0;
+        }
+        #borrowerList li {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #333;
+        }
+        #bookSearchResults {
+            position: absolute;
+            width: 60%;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            text-align: right;
+            display: none;
+            z-index: 10;
+        }
+        #bookSearchResults div {
+            padding: 10px;
+            cursor: pointer;
+        }
+        #bookSearchResults div:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>مدیریت افراد قرض‌گیرنده</h1>
+        <input type="text" id="borrowerName" placeholder="نام قرض‌گیرنده">
+        <div style="position: relative;">
+            <input type="text" id="bookSearch" placeholder="جستجوی کتاب قرض‌گرفته‌شده">
+            <div id="bookSearchResults"></div>
+        </div>
+        <input type="date" id="returnDate" placeholder="تاریخ تحویل">
+        <button onclick="addBorrower()">اضافه کردن</button>
+        <button onclick="displayBorrowers()">نمایش افراد قرض‌گیرنده</button>
+        <button onclick="window.location.href='dashboard.html'">بازگشت به مدیریت</button>
+        <div id="borrowerList"></div>
+        <p id="result"></p>
+    </div>
+
+    <script>
+        const books = JSON.parse(localStorage.getItem("bookList")) || [
+            "ریاضیات آسان", "ریاضی گسسته", "فارسی هفتم", "ملت عشق", 
+            "شازده کوچولو", "قدرت حال", "کیمیاگر", "هنر شفاف اندیشیدن"
+        ];
+
+        let borrowers = JSON.parse(localStorage.getItem("borrowerList")) || [];
+        let selectedBook = ""; // متغیر برای ذخیره کتاب انتخاب‌شده
+
+        // تنظیمات Fuse.js برای جستجوی دقیق‌تر
+        const fuseOptions = {
+            includeScore: true,
+            threshold: 0.2, // دقت بالاتر (مقدار کمتر = دقیق‌تر)
+            keys: ["title"]
+        };
+        const fuse = new Fuse(books.map(book => ({ title: book })), fuseOptions);
+
+        const bookSearchInput = document.getElementById("bookSearch");
+        const bookSearchResults = document.getElementById("bookSearchResults");
+
+        // جستجوی کتاب با تایپ
+        bookSearchInput.addEventListener("input", function() {
+            const query = this.value.trim();
+            if (query.length === 0) {
+                bookSearchResults.style.display = "none";
+                return;
+            }
+
+            const results = fuse.search(query);
+            if (results.length > 0) {
+                bookSearchResults.innerHTML = results.map(result => 
+                    `<div onclick="selectBook('${result.item.title}')">${result.item.title}</div>`
+                ).join("");
+                bookSearchResults.style.display = "block";
+            } else {
+                bookSearchResults.innerHTML = "<div>کتابی پیدا نشد</div>";
+                bookSearchResults.style.display = "block";
+            }
+        });
+
+        // انتخاب کتاب از نتایج
+        function selectBook(book) {
+            selectedBook = book;
+            bookSearchInput.value = book;
+            bookSearchResults.style.display = "none";
+        }
+
+        // بستن نتایج با کلیک خارج از آن
+        document.addEventListener("click", function(event) {
+            if (!bookSearchInput.contains(event.target) && !bookSearchResults.contains(event.target)) {
+                bookSearchResults.style.display = "none";
+            }
+        });
+
+        function addBorrower() {
+            const borrowerName = document.getElementById("borrowerName").value.trim();
+            const borrowedBook = selectedBook;
+            const returnDate = document.getElementById("returnDate").value;
+            const resultElement = document.getElementById("result");
+
+            if (!borrowerName || !borrowedBook || !returnDate) {
+                resultElement.textContent = "لطفاً همه فیلدها را پر کنید!";
+                return;
+            }
+
+            const borrower = {
+                name: borrowerName,
+                book: borrowedBook,
+                date: returnDate
+            };
+
+            borrowers.push(borrower);
+            localStorage.setItem("borrowerList", JSON.stringify(borrowers));
+            resultElement.textContent = "✅ قرض‌گیرنده با موفقیت اضافه شد!";
+            document.getElementById("borrowerName").value = "";
+            document.getElementById("bookSearch").value = "";
+            document.getElementById("returnDate").value = "";
+            selectedBook = ""; // ریست انتخاب کتاب
+            displayBorrowers();
+        }
+
+        function displayBorrowers() {
+            const borrowerListElement = document.getElementById("borrowerList");
+            if (borrowers.length === 0) {
+                borrowerListElement.textContent = "هیچ قرض‌گیرنده‌ای ثبت نشده است.";
+            } else {
+                borrowerListElement.innerHTML = `<ul>${borrowers.map((b, index) => 
+                    `<li>
+                        ${b.name} - کتاب: ${b.book} - تاریخ تحویل: ${b.date}
+                        <button class="return-btn" onclick="confirmReturn(${index})">تحویل داده شد</button>
+                    </li>`
+                ).join("")}</ul>`;
+            }
+        }
+
+        function confirmReturn(index) {
+            const confirmed = confirm("آیا مطمئن هستید که این کتاب تحویل داده شده است؟");
+            if (confirmed) {
+                borrowers.splice(index, 1);
+                localStorage.setItem("borrowerList", JSON.stringify(borrowers));
+                displayBorrowers();
+                document.getElementById("result").textContent = "✅ کتاب تحویل داده شد و اطلاعات حذف شد.";
+            }
+        }
+
+        displayBorrowers();
+
+        document.getElementById("returnDate").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                addBorrower();
+            }
+        });
+    </script>
+</body>
+</html>

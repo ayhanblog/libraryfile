@@ -76,23 +76,56 @@
     </div>
 
     <script>
+        const admins = [
+            { username: "host", password: "host123", fullName: "مدیریت اصلی", dashboard: "host.html" },
+            { username: "admin1", password: "pass123", fullName: "پارسا خدایاری", dashboard: "dashboard.html" },
+            { username: "admin2", password: "pass456", fullName: "علی رضایی", dashboard: "dashboard.html" },
+            { username: "admin3", password: "pass789", fullName: "مریم حسینی", dashboard: "dashboard.html" }
+        ];
+
+        if (!localStorage.getItem("admins")) {
+            localStorage.setItem("admins", JSON.stringify(admins));
+        }
+
+        function toPersianDate(date) {
+            const persianDate = new Date(date).toLocaleDateString("fa-IR", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            }).replace(/(\d+)\/(\d+)\/(\d+)/, "$3/$2/$1");
+            return persianDate;
+        }
+
         function login() {
             const username = document.getElementById("username").value.trim();
             const password = document.getElementById("password").value.trim();
             const resultElement = document.getElementById("loginResult");
-
-            const adminUsername = "admin";
-            const adminPassword = "12345";
 
             if (!username || !password) {
                 resultElement.textContent = "لطفاً نام کاربری و رمز عبور را وارد کنید!";
                 return;
             }
 
-            if (username === adminUsername && password === adminPassword) {
+            const storedAdmins = JSON.parse(localStorage.getItem("admins")) || admins;
+            const admin = storedAdmins.find(a => a.username === username && a.password === password);
+
+            if (admin) {
+                let activityLog = JSON.parse(localStorage.getItem("activityLog")) || [];
+                const loginActivity = {
+                    admin: admin.fullName,
+                    action: "login",
+                    timestamp: toPersianDate(new Date())
+                };
+                activityLog.push(loginActivity);
+                localStorage.setItem("activityLog", JSON.stringify(activityLog));
+
                 resultElement.textContent = "✅ ورود موفقیت‌آمیز! در حال انتقال...";
+                localStorage.setItem("currentAdmin", JSON.stringify(admin));
                 setTimeout(() => {
-                    window.location.href = "dashboard.html";
+                    window.location.href = admin.dashboard;
                 }, 1000);
             } else {
                 resultElement.textContent = "❌ نام کاربری یا رمز عبور اشتباه است!";

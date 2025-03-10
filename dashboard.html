@@ -92,11 +92,64 @@
             font-size: 16px;
             color: #333;
         }
+        .profile {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+        }
+        .profile span {
+            font-size: 16px;
+            color: #333;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 50px;
+        }
+        .profile-menu {
+            position: absolute;
+            top: 40px;
+            right: 0;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            display: none;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .profile-menu div {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        .profile-menu div:hover {
+            background-color: #f0f0f0;
+        }
+        #passwordChangeForm {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+        #passwordChangeForm input {
+            width: 90%;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>مدیریت کتاب‌ها</h1>
+        <div class="profile">
+            <span id="adminName"></span>
+            <div class="profile-menu" id="profileMenu">
+                <div onclick="showPasswordChange()">تغییر رمز عبور</div>
+                <div onclick="logout()">خروج</div>
+            </div>
+        </div>
         <input type="text" id="newBook" placeholder="نام کتاب جدید را وارد کنید">
         <button onclick="addBook()">اضافه کردن</button>
         <button onclick="window.location.href='index.html'">بازگشت به صفحه اصلی</button>
@@ -105,11 +158,52 @@
         <p id="result"></p>
     </div>
 
+    <div id="passwordChangeForm">
+        <h2>تغییر رمز عبور</h2>
+        <input type="password" id="oldPassword" placeholder="رمز عبور قبلی">
+        <input type="password" id="newPassword" placeholder="رمز عبور جدید">
+        <button onclick="changePassword()">تأیید</button>
+        <button onclick="hidePasswordChange()">لغو</button>
+        <p id="passwordResult"></p>
+    </div>
+
     <script>
+        const currentAdmin = JSON.parse(localStorage.getItem("currentAdmin"));
+        if (!currentAdmin) {
+            window.location.href = "admin.html";
+        } else {
+            document.getElementById("adminName").textContent = currentAdmin.fullName;
+        }
+
         let books = JSON.parse(localStorage.getItem("bookList")) || [
             "ریاضیات آسان", "ریاضی گسسته", "فارسی هفتم", "ملت عشق", 
             "شازده کوچولو", "قدرت حال", "کیمیاگر", "هنر شفاف اندیشیدن"
         ];
+        let activityLog = JSON.parse(localStorage.getItem("activityLog")) || [];
+
+        function toPersianDate(date) {
+            const persianDate = new Date(date).toLocaleDateString("fa-IR", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit"
+            }).replace(/(\d+)\/(\d+)\/(\d+)/, "$3/$2/$1");
+            return persianDate;
+        }
+
+        const profile = document.querySelector(".profile");
+        const profileMenu = document.getElementById("profileMenu");
+        profile.addEventListener("click", function() {
+            profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
+        });
+
+        document.addEventListener("click", function(event) {
+            if (!profile.contains(event.target)) {
+                profileMenu.style.display = "none";
+            }
+        });
 
         function displayBooks() {
             const bookListElement = document.getElementById("bookList");
@@ -141,6 +235,16 @@
 
             books.push(newBook);
             localStorage.setItem("bookList", JSON.stringify(books));
+
+            const activity = {
+                admin: currentAdmin.fullName,
+                action: "add",
+                book: newBook,
+                timestamp: toPersianDate(new Date())
+            };
+            activityLog.push(activity);
+            localStorage.setItem("activityLog", JSON.stringify(activityLog));
+
             resultElement.textContent = "✅ کتاب با موفقیت اضافه شد!";
             document.getElementById("newBook").value = "";
             displayBooks();
@@ -154,6 +258,50 @@
                 displayBooks();
                 document.getElementById("result").textContent = "✅ کتاب با موفقیت حذف شد.";
             }
+        }
+
+        function logout() {
+            localStorage.removeItem("currentAdmin");
+            window.location.href = "admin.html";
+        }
+
+        function showPasswordChange() {
+            document.getElementById("passwordChangeForm").style.display = "block";
+            profileMenu.style.display = "none";
+        }
+
+        function hidePasswordChange() {
+            document.getElementById("passwordChangeForm").style.display = "none";
+            document.getElementById("oldPassword").value = "";
+            document.getElementById("newPassword").value = "";
+            document.getElementById("passwordResult").textContent = "";
+        }
+
+        function changePassword() {
+            const oldPassword = document.getElementById("oldPassword").value;
+            const newPassword = document.getElementById("newPassword").value;
+            const resultElement = document.getElementById("passwordResult");
+
+            if (!oldPassword || !newPassword) {
+                resultElement.textContent = "لطفاً هر دو فیلد را پر کنید!";
+                return;
+            }
+
+            if (oldPassword !== currentAdmin.password) {
+                resultElement.textContent = "رمز عبور قبلی اشتباه است!";
+                return;
+            }
+
+            let admins = JSON.parse(localStorage.getItem("admins"));
+            const adminIndex = admins.findIndex(a => a.username === currentAdmin.username);
+            admins[adminIndex].password = newPassword;
+            localStorage.setItem("admins", JSON.stringify(admins));
+
+            currentAdmin.password = newPassword;
+            localStorage.setItem("currentAdmin", JSON.stringify(currentAdmin));
+
+            resultElement.textContent = "✅ رمز عبور با موفقیت تغییر کرد!";
+            setTimeout(hidePasswordChange, 1000);
         }
 
         displayBooks();

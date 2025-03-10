@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت مسئولان</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazir&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Vazir', sans-serif;
+        }
+        body {
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        .container {
+            background: #fff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 12px;
+            width: 60%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            background-color: #fafafa;
+        }
+        input:focus {
+            background-color: #fff;
+            outline: none;
+            border-color: #007bff;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out;
+            margin: 0 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .edit-btn {
+            background-color: #28a745;
+        }
+        .edit-btn:hover {
+            background-color: #218838;
+        }
+        #adminList {
+            margin-top: 20px;
+            text-align: right;
+            font-size: 16px;
+        }
+        #adminList ul {
+            list-style: none;
+            padding: 0;
+        }
+        #adminList li {
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #333;
+        }
+        #editAdminForm {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+        #editAdminForm input {
+            width: 90%;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>مدیریت مسئولان</h1>
+        <input type="text" id="newUsername" placeholder="نام کاربری جدید">
+        <input type="text" id="newFullName" placeholder="نام و نام خانوادگی">
+        <input type="password" id="newPassword" placeholder="رمز عبور جدید">
+        <button onclick="addAdmin()">اضافه کردن</button>
+        <button onclick="window.location.href='host.html'">بازگشت</button>
+        <div id="adminList"></div>
+        <p id="result"></p>
+    </div>
+
+    <div id="editAdminForm">
+        <h2>ویرایش مسئول</h2>
+        <input type="text" id="editUsername" placeholder="نام کاربری جدید">
+        <input type="text" id="editFullName" placeholder="نام و نام خانوادگی جدید">
+        <input type="password" id="editPassword" placeholder="رمز عبور جدید">
+        <button onclick="saveEditAdmin()">ذخیره</button>
+        <button onclick="hideEditForm()">لغو</button>
+        <p id="editResult"></p>
+    </div>
+
+    <script>
+        const currentAdmin = JSON.parse(localStorage.getItem("currentAdmin"));
+        if (!currentAdmin || currentAdmin.username !== "host") {
+            window.location.href = "admin.html";
+        }
+
+        let admins = JSON.parse(localStorage.getItem("admins")) || [];
+        let editIndex = -1;
+
+        function displayAdmins() {
+            const adminListElement = document.getElementById("adminList");
+            if (admins.length === 0) {
+                adminListElement.textContent = "هیچ مسئولی ثبت نشده است.";
+            } else {
+                adminListElement.innerHTML = `<ul>${admins.map((admin, index) => 
+                    `<li>
+                        ${admin.fullName} (${admin.username}) - ${admin.password}
+                        <button class="edit-btn" onclick="showEditForm(${index})">ویرایش</button>
+                        <button class="delete-btn" onclick="confirmDelete(${index})">حذف</button>
+                    </li>`
+                ).join("")}</ul>`;
+            }
+        }
+
+        function addAdmin() {
+            const newUsername = document.getElementById("newUsername").value.trim();
+            const newFullName = document.getElementById("newFullName").value.trim();
+            const newPassword = document.getElementById("newPassword").value.trim();
+            const resultElement = document.getElementById("result");
+
+            if (!newUsername || !newFullName || !newPassword) {
+                resultElement.textContent = "لطفاً همه فیلدها را پر کنید!";
+                return;
+            }
+
+            if (admins.some(a => a.username === newUsername)) {
+                resultElement.textContent = "❌ این نام کاربری قبلاً وجود دارد!";
+                return;
+            }
+
+            const newAdmin = {
+                username: newUsername,
+                fullName: newFullName,
+                password: newPassword,
+                dashboard: "dashboard.html"
+            };
+            admins.push(newAdmin);
+            localStorage.setItem("admins", JSON.stringify(admins));
+            resultElement.textContent = "✅ مسئول جدید با موفقیت اضافه شد!";
+            document.getElementById("newUsername").value = "";
+            document.getElementById("newFullName").value = "";
+            document.getElementById("newPassword").value = "";
+            displayAdmins();
+        }
+
+        function confirmDelete(index) {
+            if (admins[index].username === "host") {
+                document.getElementById("result").textContent = "❌ نمی‌توانید اکانت host را حذف کنید!";
+                return;
+            }
+            const confirmed = confirm(`آیا مطمئن هستید که می‌خواهید "${admins[index].fullName}" را حذف کنید؟`);
+            if (confirmed) {
+                admins.splice(index, 1);
+                localStorage.setItem("admins", JSON.stringify(admins));
+                displayAdmins();
+                document.getElementById("result").textContent = "✅ مسئول با موفقیت حذف شد.";
+            }
+        }
+
+        function showEditForm(index) {
+            editIndex = index;
+            document.getElementById("editUsername").value = admins[index].username;
+            document.getElementById("editFullName").value = admins[index].fullName;
+            document.getElementById("editPassword").value = admins[index].password;
+            document.getElementById("editAdminForm").style.display = "block";
+            document.getElementById("editResult").textContent = "";
+        }
+
+        function hideEditForm() {
+            document.getElementById("editAdminForm").style.display = "none";
+            document.getElementById("editUsername").value = "";
+            document.getElementById("editFullName").value = "";
+            document.getElementById("editPassword").value = "";
+            document.getElementById("editResult").textContent = "";
+            editIndex = -1;
+        }
+
+        function saveEditAdmin() {
+            const newUsername = document.getElementById("editUsername").value.trim();
+            const newFullName = document.getElementById("editFullName").value.trim();
+            const newPassword = document.getElementById("editPassword").value.trim();
+            const resultElement = document.getElementById("editResult");
+
+            if (!newUsername || !newFullName || !newPassword) {
+                resultElement.textContent = "لطفاً همه فیلدها را پر کنید!";
+                return;
+            }
+
+            if (newUsername !== admins[editIndex].username && admins.some(a => a.username === newUsername)) {
+                resultElement.textContent = "❌ این نام کاربری قبلاً وجود دارد!";
+                return;
+            }
+
+            if (admins[editIndex].username === "host" && newUsername !== "host") {
+                resultElement.textContent = "❌ نمی‌توانید نام کاربری host را تغییر دهید!";
+                return;
+            }
+
+            admins[editIndex].username = newUsername;
+            admins[editIndex].fullName = newFullName;
+            admins[editIndex].password = newPassword;
+            localStorage.setItem("admins", JSON.stringify(admins));
+            resultElement.textContent = "✅ تغییرات با موفقیت ذخیره شد!";
+            setTimeout(hideEditForm, 1000);
+            displayAdmins();
+        }
+
+        displayAdmins();
+
+        document.getElementById("newPassword").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                addAdmin();
+            }
+        });
+
+        document.getElementById("editPassword").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                saveEditAdmin();
+            }
+        });
+    </script>
+</body>
+</html>

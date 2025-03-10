@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جستجوی کتاب</title>
+    <title>کتابخانه</title>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Vazir&display=swap" rel="stylesheet">
     <style>
@@ -23,7 +23,7 @@
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 600px;
             margin: 50px auto;
             text-align: center;
         }
@@ -32,22 +32,27 @@
             color: #333;
             margin-bottom: 20px;
         }
+        .search-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
         input {
             padding: 12px;
-            width: 100%;
+            width: 60%;
             border: 1px solid #ccc;
             border-radius: 8px;
             font-size: 16px;
-            margin-bottom: 20px;
             background-color: #fafafa;
-            transition: background-color 0.3s ease-in-out;
         }
         input:focus {
             background-color: #fff;
             outline: none;
             border-color: #007bff;
         }
-        button, .admin-btn {
+        button {
             padding: 12px 20px;
             font-size: 16px;
             background-color: #007bff;
@@ -56,85 +61,113 @@
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.3s ease-in-out;
-            margin: 10px 0;
+            margin: 10px;
         }
-        button:hover, .admin-btn:hover {
+        button:hover {
             background-color: #0056b3;
         }
-        #result {
-            margin-top: 20px;
+        #clearSearch {
+            background-color: #dc3545;
+            padding: 12px 16px;
             font-size: 18px;
-            font-weight: 600;
-            color: #333;
+            line-height: 1;
         }
-        #result ul {
+        #clearSearch:hover {
+            background-color: #c82333;
+        }
+        #bookList {
+            margin-top: 20px;
+            text-align: right;
+            font-size: 16px;
+        }
+        #bookList ul {
             list-style: none;
             padding: 0;
-            text-align: right;
+            animation: fadeIn 0.3s ease-in;
         }
-        #result li {
-            margin: 5px 0;
+        #bookList li {
+            margin: 10px 0;
         }
-        .note {
+        #bookList .available {
+            color: #28a745; /* سبز برای موجود */
+        }
+        #bookList .borrowed {
+            color: #dc3545; /* قرمز برای قرض داده شده */
+        }
+        #bookList p {
+            text-align: center;
             font-size: 14px;
-            color: #777;
-            margin-top: 10px;
+            color: #666;
+            margin-bottom: 10px;
         }
-        @media (max-width: 500px) {
-            .container {
-                padding: 20px;
-                margin: 20px auto;
-            }
-            h1 {
-                font-size: 1.5rem;
-            }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>جستجوی کتاب</h1>
-        <input type="text" id="bookInput" placeholder="نام کتاب را وارد کنید">
-        <br>
-        <button onclick="searchBook()">جستجو</button>
-        <br>
-        <a href="admin.html"><button class="admin-btn">ورود به صفحه مدیریت</button></a>
-        <p id="result"></p>
-        <p class="note">* در صورتی که کتاب مشابهی پیدا نکردید، نام کتاب را دقیق‌تر وارد کنید.</p>
+        <h1>کتابخانه</h1>
+        <div class="search-container">
+            <input type="text" id="bookSearch" placeholder="عنوان کتاب را وارد کنید">
+            <button onclick="searchBook()">جستجو</button>
+            <button id="clearSearch" onclick="clearSearch()">×</button>
+        </div>
+        <button onclick="window.location.href='admin.html'">ورود به مدیریت</button>
+        <div id="bookList"></div>
     </div>
 
     <script>
-        let books = JSON.parse(localStorage.getItem("bookList")) || [
+        const books = JSON.parse(localStorage.getItem("bookList")) || [
             "ریاضیات آسان", "ریاضی گسسته", "فارسی هفتم", "ملت عشق", 
             "شازده کوچولو", "قدرت حال", "کیمیاگر", "هنر شفاف اندیشیدن"
         ];
+        const borrowers = JSON.parse(localStorage.getItem("borrowerList")) || [];
 
-        const options = {
+        const fuseOptions = {
             includeScore: true,
-            threshold: 0.4,
-            keys: ["bookName"]
+            threshold: 0.6, // تطابق بالای 40 درصد
+            keys: ["title"]
         };
-        const fuse = new Fuse(books.map(book => ({ bookName: book })), options);
+        const fuse = new Fuse(books.map(book => ({ title: book })), fuseOptions);
+
+        const bookSearchInput = document.getElementById("bookSearch");
+        const bookListElement = document.getElementById("bookList");
 
         function searchBook() {
-            const bookName = document.getElementById("bookInput").value.trim();
-            const resultElement = document.getElementById("result");
-
-            if (!bookName) {
-                resultElement.textContent = "لطفاً نام کتاب را وارد کنید!";
+            const query = bookSearchInput.value.trim();
+            if (!query) {
+                bookListElement.textContent = "لطفاً عنوان کتاب را وارد کنید.";
                 return;
             }
 
-            const results = fuse.search(bookName);
-            if (results.length > 0) {
-                const foundBooks = results.map(result => `<li>${result.item.bookName}</li>`).join("");
-                resultElement.innerHTML = `✅ کتاب‌های مشابه:<ul>${foundBooks}</ul>`;
+            const results = fuse.search(query);
+            const matchingBooks = results.filter(result => result.score <= 0.6); // فقط تطابق بالای 40 درصد
+
+            if (matchingBooks.length > 0) {
+                bookListElement.innerHTML = `
+                    <p>${matchingBooks.length} نتیجه پیدا شد:</p>
+                    <ul>${matchingBooks.map(result => {
+                        const book = result.item.title;
+                        const borrowed = borrowers.some(b => b.book === book);
+                        return `<li>${book} <span class="${borrowed ? 'borrowed' : 'available'}">${borrowed ? "(قرض داده شده است)" : "(موجود)"}</span></li>`;
+                    }).join("")}</ul>
+                `;
             } else {
-                resultElement.textContent = "❌ کتابی با این نام پیدا نشد، شاید اسم را اشتباه تایپ کردید؟";
+                bookListElement.textContent = `کتابی با عنوان "${query}" پیدا نشد.`;
             }
         }
 
-        document.getElementById("bookInput").addEventListener("keypress", function(event) {
+        function clearSearch() {
+            bookSearchInput.value = "";
+            bookListElement.textContent = "لطفاً نام کتاب را برای جستجو وارد کنید.";
+        }
+
+        // نمایش اولیه بدون لیست
+        bookListElement.textContent = "لطفاً نام کتاب را برای جستجو وارد کنید.";
+
+        bookSearchInput.addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 searchBook();
             }

@@ -6,64 +6,15 @@
     <title>ورود به مدیریت</title>
     <link href="https://fonts.googleapis.com/css2?family=Vazir&display=swap" rel="stylesheet">
     <style>
-        * {
-            font-family: 'Vazir', sans-serif;
-        }
-        body {
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-            color: #333;
-        }
-        .container {
-            background: #fff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-            margin: 50px auto;
-            text-align: center;
-        }
-        h1 {
-            font-size: 2rem;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        input {
-            padding: 12px;
-            width: 100%;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 20px;
-            background-color: #fafafa;
-            transition: background-color 0.3s ease-in-out;
-        }
-        input:focus {
-            background-color: #fff;
-            outline: none;
-            border-color: #007bff;
-        }
-        button {
-            padding: 12px 20px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease-in-out;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #loginResult {
-            margin-top: 20px;
-            font-size: 16px;
-            color: #333;
-        }
+        * { font-family: 'Vazir', sans-serif; }
+        body { text-align: center; margin: 0; padding: 0; background-color: #f0f0f0; color: #333; }
+        .container { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; margin: 50px auto; text-align: center; }
+        h1 { font-size: 2rem; color: #333; margin-bottom: 20px; }
+        input { padding: 12px; width: 80%; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; margin-bottom: 20px; background-color: #fafafa; }
+        input:focus { background-color: #fff; outline: none; border-color: #007bff; }
+        button { padding: 12px 20px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease-in-out; }
+        button:hover { background-color: #0056b3; }
+        #result { margin-top: 20px; font-size: 16px; color: #333; }
     </style>
 </head>
 <body>
@@ -72,70 +23,55 @@
         <input type="text" id="username" placeholder="نام کاربری">
         <input type="password" id="password" placeholder="رمز عبور">
         <button onclick="login()">ورود</button>
-        <p id="loginResult"></p>
+        <button onclick="window.location.href='index.html'">بازگشت</button>
+        <p id="result"></p>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script>
-        const admins = [
-            { username: "host", password: "host123", fullName: "مدیریت اصلی", dashboard: "host.html" },
-            { username: "admin1", password: "pass123", fullName: "پارسا خدایاری", dashboard: "dashboard.html" },
-            { username: "admin2", password: "pass456", fullName: "علی رضایی", dashboard: "dashboard.html" },
-            { username: "admin3", password: "pass789", fullName: "مریم حسینی", dashboard: "dashboard.html" }
-        ];
+        const firebaseConfig = {
+            apiKey: "AIzaSyCN0XZvBkTyloHjFcONykBEyBl_gdQb4Zc",
+            authDomain: "libraryapp-6f57d.firebaseapp.com",
+            projectId: "libraryapp-6f57d",
+            storageBucket: "libraryapp-6f57d.firebasestorage.app",
+            messagingSenderId: "328447424157",
+            appId: "1:328447424157:web:74ebf69fe1207d0238c674"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        if (!localStorage.getItem("admins")) {
-            localStorage.setItem("admins", JSON.stringify(admins));
-        }
-
-        function toPersianDate(date) {
-            const persianDate = new Date(date).toLocaleDateString("fa-IR", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit"
-            }).replace(/(\d+)\/(\d+)\/(\d+)/, "$3/$2/$1");
-            return persianDate;
-        }
-
-        function login() {
+        async function login() {
             const username = document.getElementById("username").value.trim();
             const password = document.getElementById("password").value.trim();
-            const resultElement = document.getElementById("loginResult");
+            const resultElement = document.getElementById("result");
 
-            if (!username || !password) {
-                resultElement.textContent = "لطفاً نام کاربری و رمز عبور را وارد کنید!";
-                return;
-            }
-
-            const storedAdmins = JSON.parse(localStorage.getItem("admins")) || admins;
-            const admin = storedAdmins.find(a => a.username === username && a.password === password);
-
-            if (admin) {
-                let activityLog = JSON.parse(localStorage.getItem("activityLog")) || [];
-                const loginActivity = {
-                    admin: admin.fullName,
-                    action: "login",
-                    timestamp: toPersianDate(new Date())
-                };
-                activityLog.push(loginActivity);
-                localStorage.setItem("activityLog", JSON.stringify(activityLog));
-
-                resultElement.textContent = "✅ ورود موفقیت‌آمیز! در حال انتقال...";
-                localStorage.setItem("currentAdmin", JSON.stringify(admin));
-                setTimeout(() => {
-                    window.location.href = admin.dashboard;
-                }, 1000);
-            } else {
-                resultElement.textContent = "❌ نام کاربری یا رمز عبور اشتباه است!";
+            try {
+                const adminSnapshot = await db.collection("admins").where("username", "==", username).where("password", "==", password).get();
+                if (adminSnapshot.empty) {
+                    resultElement.textContent = "❌ نام کاربری یا رمز عبور اشتباه است!";
+                } else {
+                    const adminData = adminSnapshot.docs[0].data();
+                    localStorage.setItem("currentAdmin", JSON.stringify(adminData));
+                    await db.collection("activities").add({
+                        user: adminData.fullName,
+                        action: "وارد سیستم شد",
+                        type: "login",
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    if (username === "host") {
+                        window.location.href = "host.html";
+                    } else {
+                        window.location.href = "dashboard.html";
+                    }
+                }
+            } catch (error) {
+                resultElement.textContent = "❌ خطا: " + error.message;
             }
         }
 
-        document.addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                login();
-            }
+        document.getElementById("password").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") login();
         });
     </script>
 </body>

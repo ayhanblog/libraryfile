@@ -6,304 +6,94 @@
     <title>مدیریت رسمی کتابخانه</title>
     <link href="https://fonts.googleapis.com/css2?family=Vazir&display=swap" rel="stylesheet">
     <style>
-        * {
-            font-family: 'Vazir', sans-serif;
-        }
-        body {
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-            color: #333;
-        }
-        .container {
-            background: #fff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 800px;
-            margin: 50px auto;
-            text-align: center;
-        }
-        h1 {
-            font-size: 2rem;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        input {
-            padding: 12px;
-            width: 70%;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 20px;
-            background-color: #fafafa;
-        }
-        input:focus {
-            background-color: #fff;
-            outline: none;
-            border-color: #007bff;
-        }
-        button {
-            padding: 12px 20px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease-in-out;
-            margin: 0 5px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .delete-btn {
-            padding: 8px 12px;
-            font-size: 14px;
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        .delete-btn:hover {
-            background-color: #c82333;
-        }
-        .clear-btn {
-            background-color: #ffc107;
-        }
-        .clear-btn:hover {
-            background-color: #e0a800;
-        }
-        .received-btn {
-            padding: 8px 12px;
-            font-size: 14px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        .received-btn:hover {
-            background-color: #218838;
-        }
-        #bookList, #activityLog {
-            margin-top: 20px;
-            text-align: right;
-            font-size: 16px;
-        }
-        #bookList ul, #activityLog ul {
-            list-style: none;
-            padding: 0;
-        }
-        #bookList li, #activityLog li {
-            margin: 10px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        #result {
-            margin-top: 20px;
-            font-size: 16px;
-            color: #333;
-        }
-        .profile {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            cursor: pointer;
-        }
-        .profile span {
-            font-size: 16px;
-            color: #333;
-            padding: 10px;
-            background: #e9ecef;
-            border-radius: 50px;
-        }
-        .profile-menu {
-            position: absolute;
-            top: 40px;
-            right: 0;
-            background: #fff;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            display: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        .profile-menu div {
-            padding: 10px 20px;
-            cursor: pointer;
-        }
-        .profile-menu div:hover {
-            background-color: #f0f0f0;
-        }
-        #passwordChangeForm {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            z-index: 100;
-        }
-        #passwordChangeForm input {
-            width: 90%;
-            margin: 10px 0;
-        }
-        .filters {
-            margin: 20px 0;
-            text-align: right;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
-        .filters label {
-            margin-left: 5px;
-            cursor: pointer;
-        }
-        .filters input[type="checkbox"] {
-            width: auto;
-            cursor: pointer;
-        }
+        * { font-family: 'Vazir', sans-serif; }
+        body { text-align: center; margin: 0; padding: 0; background-color: #f0f0f0; color: #333; }
+        .container { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); width: 100%; max-width: 800px; margin: 50px auto; text-align: center; }
+        h1, h2 { font-size: 2rem; color: #333; margin-bottom: 20px; }
+        input { padding: 12px; width: 70%; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; margin-bottom: 20px; background-color: #fafafa; }
+        input:focus { background-color: #fff; outline: none; border-color: #007bff; }
+        button { padding: 12px 20px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease-in-out; margin: 0 5px; }
+        button:hover { background-color: #0056b3; }
+        .delete-btn { background-color: #dc3545; }
+        .delete-btn:hover { background-color: #c82333; }
+        .received-btn { background-color: #28a745; }
+        .received-btn:hover { background-color: #218838; }
+        .clear-btn { background-color: #ff851b; }
+        .clear-btn:hover { background-color: #e57300; }
+        #bookList, #activityList { margin-top: 20px; text-align: right; font-size: 16px; }
+        #bookList ul, #activityList ul { list-style: none; padding: 0; }
+        #bookList li, #activityList li { margin: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+        #result { margin-top: 20px; font-size: 16px; color: #333; }
+        select { padding: 10px; margin: 10px; border-radius: 8px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>مدیریت رسمی کتابخانه</h1>
-        <div class="profile">
-            <span id="adminName"></span>
-            <div class="profile-menu" id="profileMenu">
-                <div onclick="showPasswordChange()">تغییر رمز عبور</div>
-                <div onclick="logout()">خروج</div>
-            </div>
-        </div>
         <input type="text" id="newBook" placeholder="نام کتاب جدید را وارد کنید">
         <button onclick="addBook()">اضافه کردن</button>
         <button onclick="window.location.href='index.html'">بازگشت به صفحه اصلی</button>
-        <button onclick="goToBorrowers()">مدیریت افراد قرض‌گیرنده</button>
         <button onclick="window.location.href='manage_admins.html'">مدیریت مسئولان</button>
+        <button onclick="window.location.href='borrowers.html'">مدیریت قرض‌گیرنده‌ها</button>
         <div id="bookList"></div>
-        <h2>فعالیت کاربران</h2>
-        <div class="filters">
-            <label><input type="checkbox" id="filterLogin" onchange="displayActivityLog()"> ورود به سیستم</label>
-            <label><input type="checkbox" id="filterAdd" onchange="displayActivityLog()"> افزودن کتاب</label>
-            <label><input type="checkbox" id="filterBorrow" onchange="displayActivityLog()"> قرض دادن</label>
-            <label><input type="checkbox" id="filterReturn" onchange="displayActivityLog()"> تحویل گرفتن</label>
-        </div>
-        <button class="clear-btn" onclick="clearActivityLog()">پاک کردن تاریخچه</button>
-        <div id="activityLog"></div>
         <p id="result"></p>
+
+        <h2>گزارش فعالیت کاربران</h2>
+        <select id="activityFilter" onchange="displayActivities()">
+            <option value="all">همه فعالیت‌ها</option>
+            <option value="login">ورود به سیستم</option>
+            <option value="books">کتاب‌ها</option>
+            <option value="borrowers">قرض‌گیرنده‌ها</option>
+        </select>
+        <button class="clear-btn" onclick="clearAllActivities()">پاک کردن کل تاریخچه</button>
+        <div id="activityList"></div>
     </div>
 
-    <div id="passwordChangeForm">
-        <h2>تغییر رمز عبور</h2>
-        <input type="password" id="oldPassword" placeholder="رمز عبور قبلی">
-        <input type="password" id="newPassword" placeholder="رمز عبور جدید">
-        <button onclick="changePassword()">تأیید</button>
-        <button onclick="hidePasswordChange()">لغو</button>
-        <p id="passwordResult"></p>
-    </div>
-
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCN0XZvBkTyloHjFcONykBEyBl_gdQb4Zc",
+            authDomain: "libraryapp-6f57d.firebaseapp.com",
+            projectId: "libraryapp-6f57d",
+            storageBucket: "libraryapp-6f57d.firebasestorage.app",
+            messagingSenderId: "328447424157",
+            appId: "1:328447424157:web:74ebf69fe1207d0238c674"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         const currentAdmin = JSON.parse(localStorage.getItem("currentAdmin"));
         if (!currentAdmin) {
             window.location.href = "admin.html";
-        } else {
-            document.getElementById("adminName").textContent = currentAdmin.fullName;
         }
 
-        let books = JSON.parse(localStorage.getItem("bookList")) || [
-            "ریاضیات آسان", "ریاضی گسسته", "فارسی هفتم", "ملت عشق", 
-            "شازده کوچولو", "قدرت حال", "کیمیاگر", "هنر شفاف اندیشیدن"
-        ];
-        let activityLog = JSON.parse(localStorage.getItem("activityLog")) || [];
-
-        function toPersianDate(date) {
-            const persianDate = new Date(date).toLocaleDateString("fa-IR", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit"
-            }).replace(/(\d+)\/(\d+)\/(\d+)/, "$3/$2/$1");
-            return persianDate;
-        }
-
-        const profile = document.querySelector(".profile");
-        const profileMenu = document.getElementById("profileMenu");
-        profile.addEventListener("click", function() {
-            profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
-        });
-
-        document.addEventListener("click", function(event) {
-            if (!profile.contains(event.target)) {
-                profileMenu.style.display = "none";
-            }
-        });
-
-        function goToBorrowers() {
-            localStorage.setItem("returnPage", "host.html");
-            window.location.href = "borrowers.html";
-        }
-
-        function displayBooks() {
+        // مدیریت کتاب‌ها
+        async function displayBooks() {
             const bookListElement = document.getElementById("bookList");
-            if (books.length === 0) {
-                bookListElement.textContent = "هیچ کتابی ثبت نشده است.";
-            } else {
-                bookListElement.innerHTML = `<ul>${books.map((book, index) => 
-                    `<li>
-                        ${book}
-                        <button class="delete-btn" onclick="confirmDelete(${index})">حذف</button>
-                    </li>`
-                ).join("")}</ul>`;
+            bookListElement.innerHTML = "";
+            try {
+                const snapshot = await db.collection("books").get();
+                if (snapshot.empty) {
+                    bookListElement.textContent = "هیچ کتابی ثبت نشده است.";
+                } else {
+                    let html = "<ul>";
+                    snapshot.forEach(doc => {
+                        const book = doc.data().title;
+                        html += `<li>
+                            ${book}
+                            <button class="delete-btn" onclick="confirmDelete('${doc.id}')">حذف</button>
+                        </li>`;
+                    });
+                    html += "</ul>";
+                    bookListElement.innerHTML = html;
+                }
+            } catch (error) {
+                bookListElement.textContent = "خطا: " + error.message;
             }
         }
 
-        function displayActivityLog() {
-            const activityLogElement = document.getElementById("activityLog");
-            const filterLogin = document.getElementById("filterLogin").checked;
-            const filterAdd = document.getElementById("filterAdd").checked;
-            const filterBorrow = document.getElementById("filterBorrow").checked;
-            const filterReturn = document.getElementById("filterReturn").checked;
-
-            // اگه هیچ تیکی نخورده باشه، همه رو نشون بده
-            const noFilters = !filterLogin && !filterAdd && !filterBorrow && !filterReturn;
-            const filteredLog = noFilters ? activityLog : activityLog.filter(log => 
-                (filterLogin && log.action === "login") ||
-                (filterAdd && log.action === "add") ||
-                (filterBorrow && log.action === "borrow") ||
-                (filterReturn && log.action === "return")
-            );
-
-            if (filteredLog.length === 0) {
-                activityLogElement.textContent = noFilters ? "هیچ فعالیتی ثبت نشده است." : "هیچ فعالیتی با فیلتر انتخاب‌شده ثبت نشده است.";
-            } else {
-                activityLogElement.innerHTML = `<ul>${filteredLog.map((log, index) => 
-                    `<li>
-                        ${
-                            log.action === "add" ? `${log.admin} کتاب "${log.book}" را در ${log.timestamp} اضافه کرد` :
-                            log.action === "borrow" ? `${log.admin} کتاب "${log.book}" را در ${log.timestamp} به ${log.borrower} قرض داد` :
-                            log.action === "return" ? `${log.admin} کتاب "${log.book}" را در ${log.timestamp} از ${log.borrower} تحویل گرفت` :
-                            log.action === "login" ? `${log.admin} در ${log.timestamp} وارد سیستم شد` :
-                            "فعالیت ناشناخته"
-                        }
-                        <button class="received-btn" onclick="removeActivity(${activityLog.indexOf(log)})">دریافت شد</button>
-                    </li>`
-                ).join("")}</ul>`;
-            }
-        }
-
-        function addBook() {
+        async function addBook() {
             const newBook = document.getElementById("newBook").value.trim();
             const resultElement = document.getElementById("result");
 
@@ -312,111 +102,116 @@
                 return;
             }
 
-            if (books.includes(newBook)) {
-                resultElement.textContent = "❌ این کتاب قبلاً اضافه شده است!";
-                return;
+            try {
+                const bookSnapshot = await db.collection("books").where("title", "==", newBook).get();
+                if (!bookSnapshot.empty) {
+                    resultElement.textContent = "❌ این کتاب قبلاً اضافه شده است!";
+                    return;
+                }
+
+                await db.collection("books").add({
+                    title: newBook,
+                    addedBy: currentAdmin.fullName,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await db.collection("activities").add({
+                    user: currentAdmin.fullName,
+                    action: `کتاب "${newBook}" را اضافه کرد`,
+                    type: "books",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                resultElement.textContent = "✅ کتاب با موفقیت اضافه شد!";
+                document.getElementById("newBook").value = "";
+                displayBooks();
+                displayActivities();
+            } catch (error) {
+                resultElement.textContent = "❌ خطا: " + error.message;
             }
-
-            books.push(newBook);
-            localStorage.setItem("bookList", JSON.stringify(books));
-
-            const activity = {
-                admin: currentAdmin.fullName,
-                action: "add",
-                book: newBook,
-                timestamp: toPersianDate(new Date())
-            };
-            activityLog.push(activity);
-            localStorage.setItem("activityLog", JSON.stringify(activityLog));
-
-            resultElement.textContent = "✅ کتاب با موفقیت اضافه شد!";
-            document.getElementById("newBook").value = "";
-            displayBooks();
-            displayActivityLog();
         }
 
-        function confirmDelete(index) {
-            const confirmed = confirm(`آیا مطمئن هستید که می‌خواهید کتاب "${books[index]}" را حذف کنید؟`);
+        async function confirmDelete(bookId) {
+            const confirmed = confirm("آیا مطمئن هستید که می‌خواهید این کتاب را حذف کنید؟");
             if (confirmed) {
-                books.splice(index, 1);
-                localStorage.setItem("bookList", JSON.stringify(books));
+                const bookDoc = await db.collection("books").doc(bookId).get();
+                const bookTitle = bookDoc.data().title;
+                await db.collection("books").doc(bookId).delete();
+                await db.collection("activities").add({
+                    user: currentAdmin.fullName,
+                    action: `کتاب "${bookTitle}" را حذف کرد`,
+                    type: "books",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
                 displayBooks();
+                displayActivities();
                 document.getElementById("result").textContent = "✅ کتاب با موفقیت حذف شد.";
             }
         }
 
-        function clearActivityLog() {
-            const confirmed = confirm("آیا مطمئن هستید که می‌خواهید کل تاریخچه فعالیت‌ها را پاک کنید؟");
+        // نمایش فعالیت‌ها
+        async function displayActivities() {
+            const activityListElement = document.getElementById("activityList");
+            const activityFilter = document.getElementById("activityFilter").value;
+            activityListElement.innerHTML = "";
+
+            try {
+                let query = db.collection("activities").orderBy("timestamp", "desc");
+                if (activityFilter !== "all") {
+                    query = query.where("type", "==", activityFilter);
+                }
+
+                const snapshot = await query.get();
+                if (snapshot.empty) {
+                    activityListElement.textContent = "هیچ فعالیتی ثبت نشده است.";
+                } else {
+                    let html = "<ul>";
+                    snapshot.forEach(doc => {
+                        const activity = doc.data();
+                        const date = activity.timestamp.toDate().toLocaleString('fa-IR');
+                        html += `<li>
+                            ${activity.user} - ${activity.action} - ${date}
+                            <button class="received-btn" onclick="deleteActivity('${doc.id}')">دریافت شد</button>
+                        </li>`;
+                    });
+                    html += "</ul>";
+                    activityListElement.innerHTML = html;
+                }
+            } catch (error) {
+                activityListElement.textContent = "خطا: " + error.message;
+            }
+        }
+
+        // حذف یک فعالیت
+        async function deleteActivity(activityId) {
+            const confirmed = confirm("آیا مطمئن هستید که می‌خواهید این گزارش را حذف کنید؟");
             if (confirmed) {
-                activityLog = [];
-                localStorage.setItem("activityLog", JSON.stringify(activityLog));
-                displayActivityLog();
-                document.getElementById("result").textContent = "✅ تاریخچه فعالیت‌ها با موفقیت پاک شد.";
+                await db.collection("activities").doc(activityId).delete();
+                displayActivities();
+                document.getElementById("result").textContent = "✅ گزارش با موفقیت حذف شد.";
             }
         }
 
-        function removeActivity(index) {
-            const confirmed = confirm("آیا مطمئن هستید که این فعالیت را دریافت کردید و می‌خواهید حذف شود؟");
+        // پاک کردن کل تاریخچه
+        async function clearAllActivities() {
+            const confirmed = confirm("آیا مطمئن هستید که می‌خواهید کل تاریخچه فعالیت‌ها را پاک کنید؟ این کار قابل بازگشت نیست!");
             if (confirmed) {
-                activityLog.splice(index, 1);
-                localStorage.setItem("activityLog", JSON.stringify(activityLog));
-                displayActivityLog();
-                document.getElementById("result").textContent = "✅ فعالیت با موفقیت حذف شد.";
+                const snapshot = await db.collection("activities").get();
+                const batch = db.batch();
+                snapshot.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+                displayActivities();
+                document.getElementById("result").textContent = "✅ کل تاریخچه با موفقیت پاک شد.";
             }
-        }
-
-        function logout() {
-            localStorage.removeItem("currentAdmin");
-            localStorage.removeItem("returnPage");
-            window.location.href = "admin.html";
-        }
-
-        function showPasswordChange() {
-            document.getElementById("passwordChangeForm").style.display = "block";
-            profileMenu.style.display = "none";
-        }
-
-        function hidePasswordChange() {
-            document.getElementById("passwordChangeForm").style.display = "none";
-            document.getElementById("oldPassword").value = "";
-            document.getElementById("newPassword").value = "";
-            document.getElementById("passwordResult").textContent = "";
-        }
-
-        function changePassword() {
-            const oldPassword = document.getElementById("oldPassword").value;
-            const newPassword = document.getElementById("newPassword").value;
-            const resultElement = document.getElementById("passwordResult");
-
-            if (!oldPassword || !newPassword) {
-                resultElement.textContent = "لطفاً هر دو فیلد را پر کنید!";
-                return;
-            }
-
-            if (oldPassword !== currentAdmin.password) {
-                resultElement.textContent = "رمز عبور قبلی اشتباه است!";
-                return;
-            }
-
-            let admins = JSON.parse(localStorage.getItem("admins"));
-            const adminIndex = admins.findIndex(a => a.username === currentAdmin.username);
-            admins[adminIndex].password = newPassword;
-            localStorage.setItem("admins", JSON.stringify(admins));
-
-            currentAdmin.password = newPassword;
-            localStorage.setItem("currentAdmin", JSON.stringify(currentAdmin));
-
-            resultElement.textContent = "✅ رمز عبور با موفقیت تغییر کرد!";
-            setTimeout(hidePasswordChange, 1000);
         }
 
         displayBooks();
-        displayActivityLog();
+        displayActivities();
 
         document.getElementById("newBook").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                addBook();
-            }
+            if (event.key === "Enter") addBook();
         });
     </script>
 </body>

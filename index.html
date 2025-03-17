@@ -4,174 +4,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>کتابخانه</title>
-    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2/dist/fuse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Vazir&display=swap" rel="stylesheet">
     <style>
-        * {
-            font-family: 'Vazir', sans-serif;
-        }
-        body {
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-            color: #333;
-        }
-        .container {
-            background: #fff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 600px;
-            margin: 50px auto;
-            text-align: center;
-        }
-        h1 {
-            font-size: 2rem;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .search-container {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        input {
-            padding: 12px;
-            width: 60%;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 16px;
-            background-color: #fafafa;
-        }
-        input:focus {
-            background-color: #fff;
-            outline: none;
-            border-color: #007bff;
-        }
-        button {
-            padding: 12px 20px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease-in-out;
-            margin: 10px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #clearSearch {
-            background-color: #dc3545;
-            padding: 12px 16px;
-            font-size: 18px;
-            line-height: 1;
-        }
-        #clearSearch:hover {
-            background-color: #c82333;
-        }
-        #bookList {
-            margin-top: 20px;
-            text-align: right;
-            font-size: 16px;
-        }
-        #bookList ul {
-            list-style: none;
-            padding: 0;
-            animation: fadeIn 0.3s ease-in;
-        }
-        #bookList li {
-            margin: 10px 0;
-        }
-        #bookList .available {
-            color: #28a745; /* سبز برای موجود */
-        }
-        #bookList .borrowed {
-            color: #dc3545; /* قرمز برای قرض داده شده */
-        }
-        #bookList p {
-            text-align: center;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 10px;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        * { font-family: 'Vazir', sans-serif; }
+        body { text-align: center; margin: 0; padding: 0; background-color: #f0f0f0; color: #333; }
+        .container { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); width: 100%; max-width: 600px; margin: 50px auto; text-align: center; }
+        h1 { font-size: 2rem; color: #333; margin-bottom: 20px; }
+        input { padding: 12px; width: 70%; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; margin-bottom: 20px; background-color: #fafafa; }
+        input:focus { background-color: #fff; outline: none; border-color: #007bff; }
+        button { padding: 12px 20px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease-in-out; margin: 10px; }
+        button:hover { background-color: #0056b3; }
+        #results { margin-top: 20px; text-align: right; font-size: 16px; }
+        #results ul { list-style: none; padding: 0; }
+        #results li { margin: 10px 0; }
+        .borrowed { color: #dc3545; }
+        .available { color: #28a745; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>کتابخانه</h1>
-        <div class="search-container">
-            <input type="text" id="bookSearch" placeholder="عنوان کتاب را وارد کنید">
-            <button onclick="searchBook()">جستجو</button>
-            <button id="clearSearch" onclick="clearSearch()">×</button>
-        </div>
+        <input type="text" id="search" placeholder="جستجوی کتاب...">
+        <button onclick="searchBooks()">جستجو</button>
         <button onclick="window.location.href='admin.html'">ورود به مدیریت</button>
-        <div id="bookList"></div>
+        <div id="results"></div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.min.js"></script>
     <script>
-        const books = JSON.parse(localStorage.getItem("bookList")) || [
-            "ریاضیات آسان", "ریاضی گسسته", "فارسی هفتم", "ملت عشق", 
-            "شازده کوچولو", "قدرت حال", "کیمیاگر", "هنر شفاف اندیشیدن"
-        ];
-        const borrowers = JSON.parse(localStorage.getItem("borrowerList")) || [];
-
-        const fuseOptions = {
-            includeScore: true,
-            threshold: 0.6, // تطابق بالای 40 درصد
-            keys: ["title"]
+        const firebaseConfig = {
+            apiKey: "AIzaSyCN0XZvBkTyloHjFcONykBEyBl_gdQb4Zc",
+            authDomain: "libraryapp-6f57d.firebaseapp.com",
+            projectId: "libraryapp-6f57d",
+            storageBucket: "libraryapp-6f57d.firebasestorage.app",
+            messagingSenderId: "328447424157",
+            appId: "1:328447424157:web:74ebf69fe1207d0238c674"
         };
-        const fuse = new Fuse(books.map(book => ({ title: book })), fuseOptions);
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-        const bookSearchInput = document.getElementById("bookSearch");
-        const bookListElement = document.getElementById("bookList");
+        let books = [];
+        let fuse = null;
 
-        function searchBook() {
-            const query = bookSearchInput.value.trim();
+        async function loadBooks() {
+            const snapshot = await db.collection("books").get();
+            books = snapshot.docs.map(doc => ({ title: doc.data().title }));
+            fuse = new Fuse(books, { keys: ['title'], threshold: 0.3 });
+        }
+
+        async function searchBooks() {
+            const query = document.getElementById("search").value.trim();
+            const resultsElement = document.getElementById("results");
+            resultsElement.innerHTML = "";
+
             if (!query) {
-                bookListElement.textContent = "لطفاً عنوان کتاب را وارد کنید.";
+                resultsElement.textContent = "لطفاً نام کتاب را وارد کنید!";
                 return;
             }
 
-            const results = fuse.search(query);
-            const matchingBooks = results.filter(result => result.score <= 0.6); // فقط تطابق بالای 40 درصد
+            if (!fuse) await loadBooks();
 
-            if (matchingBooks.length > 0) {
-                bookListElement.innerHTML = `
-                    <p>${matchingBooks.length} نتیجه پیدا شد:</p>
-                    <ul>${matchingBooks.map(result => {
-                        const book = result.item.title;
-                        const borrowed = borrowers.some(b => b.book === book);
-                        return `<li>${book} <span class="${borrowed ? 'borrowed' : 'available'}">${borrowed ? "(قرض داده شده است)" : "(موجود)"}</span></li>`;
-                    }).join("")}</ul>
-                `;
+            const searchResults = fuse.search(query);
+            if (searchResults.length === 0) {
+                resultsElement.textContent = "هیچ کتابی پیدا نشد.";
             } else {
-                bookListElement.textContent = `کتابی با عنوان "${query}" پیدا نشد.`;
+                let html = "<ul>";
+                for (const result of searchResults) {
+                    const bookTitle = result.item.title;
+                    const borrowerSnapshot = await db.collection("borrowers").where("book", "==", bookTitle).where("returned", "==", false).get();
+                    const status = borrowerSnapshot.empty ? "موجود" : "قرض داده شده";
+                    const statusClass = borrowerSnapshot.empty ? "available" : "borrowed";
+                    html += `<li>${bookTitle} - <span class="${statusClass}">${status}</span></li>`;
+                }
+                html += "</ul>";
+                resultsElement.innerHTML = html;
             }
         }
 
-        function clearSearch() {
-            bookSearchInput.value = "";
-            bookListElement.textContent = "لطفاً نام کتاب را برای جستجو وارد کنید.";
-        }
-
-        // نمایش اولیه بدون لیست
-        bookListElement.textContent = "لطفاً نام کتاب را برای جستجو وارد کنید.";
-
-        bookSearchInput.addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                searchBook();
-            }
+        document.getElementById("search").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") searchBooks();
         });
+
+        loadBooks(); // فقط برای آماده‌سازی fuse.js
     </script>
 </body>
 </html>

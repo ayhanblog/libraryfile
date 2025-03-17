@@ -3,223 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مدیریت کتاب‌ها</title>
+    <title>مدیریت کتاب‌ها و قرض‌گیرنده‌ها</title>
     <link href="https://fonts.googleapis.com/css2?family=Vazir&display=swap" rel="stylesheet">
     <style>
-        * {
-            font-family: 'Vazir', sans-serif;
-        }
-        body {
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-            color: #333;
-        }
-        .container {
-            background: #fff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 600px;
-            margin: 50px auto;
-            text-align: center;
-        }
-        h1 {
-            font-size: 2rem;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        input {
-            padding: 12px;
-            width: 70%;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            font-size: 16px;
-            margin-bottom: 20px;
-            background-color: #fafafa;
-        }
-        input:focus {
-            background-color: #fff;
-            outline: none;
-            border-color: #007bff;
-        }
-        button {
-            padding: 12px 20px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background-color 0.3s ease-in-out;
-            margin: 0 5px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .delete-btn {
-            padding: 8px 12px;
-            font-size: 14px;
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-right: 10px;
-        }
-        .delete-btn:hover {
-            background-color: #c82333;
-        }
-        #bookList {
-            margin-top: 20px;
-            text-align: right;
-            font-size: 16px;
-        }
-        #bookList ul {
-            list-style: none;
-            padding: 0;
-        }
-        #bookList li {
-            margin: 10px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        #result {
-            margin-top: 20px;
-            font-size: 16px;
-            color: #333;
-        }
-        .profile {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            cursor: pointer;
-        }
-        .profile span {
-            font-size: 16px;
-            color: #333;
-            padding: 10px;
-            background: #e9ecef;
-            border-radius: 50px;
-        }
-        .profile-menu {
-            position: absolute;
-            top: 40px;
-            right: 0;
-            background: #fff;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            display: none;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        .profile-menu div {
-            padding: 10px 20px;
-            cursor: pointer;
-        }
-        .profile-menu div:hover {
-            background-color: #f0f0f0;
-        }
-        #passwordChangeForm {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            z-index: 100;
-        }
-        #passwordChangeForm input {
-            width: 90%;
-            margin: 10px 0;
-        }
+        * { font-family: 'Vazir', sans-serif; }
+        body { text-align: center; margin: 0; padding: 0; background-color: #f0f0f0; color: #333; }
+        .container { background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); width: 100%; max-width: 800px; margin: 50px auto; text-align: center; }
+        h1, h2 { font-size: 2rem; color: #333; margin-bottom: 20px; }
+        input { padding: 12px; width: 70%; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; margin-bottom: 20px; background-color: #fafafa; }
+        input:focus { background-color: #fff; outline: none; border-color: #007bff; }
+        input[type="date"] { width: 50%; }
+        button { padding: 12px 20px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s ease-in-out; margin: 0 5px; }
+        button:hover { background-color: #0056b3; }
+        .delete-btn { background-color: #dc3545; }
+        .delete-btn:hover { background-color: #c82333; }
+        .return-btn { background-color: #28a745; }
+        .return-btn:hover { background-color: #218838; }
+        #bookList, #borrowerList { margin-top: 20px; text-align: right; font-size: 16px; }
+        #bookList.hidden { display: none; }
+        #bookList ul, #borrowerList ul { list-style: none; padding: 0; }
+        #bookList li, #borrowerList li { margin: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+        #result { margin-top: 20px; font-size: 16px; color: #333; }
+        .checkbox-label { font-size: 16px; margin-left: 10px; }
+        #bookSuggestions { position: absolute; background: #fff; border: 1px solid #ccc; border-radius: 8px; max-height: 200px; overflow-y: auto; width: 300px; text-align: right; padding: 10px; display: none; }
+        #bookSuggestions div { padding: 5px; cursor: pointer; }
+        #bookSuggestions div:hover { background-color: #f0f0f0; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>مدیریت کتاب‌ها</h1>
-        <div class="profile">
-            <span id="adminName"></span>
-            <div class="profile-menu" id="profileMenu">
-                <div onclick="showPasswordChange()">تغییر رمز عبور</div>
-                <div onclick="logout()">خروج</div>
-            </div>
-        </div>
+        <h1>مدیریت کتاب‌ها و قرض‌گیرنده‌ها</h1>
+        
+        <!-- بخش مدیریت کتاب‌ها -->
+        <h2>مدیریت کتاب‌ها</h2>
         <input type="text" id="newBook" placeholder="نام کتاب جدید را وارد کنید">
         <button onclick="addBook()">اضافه کردن</button>
         <button onclick="window.location.href='index.html'">بازگشت به صفحه اصلی</button>
-        <button onclick="window.location.href='borrowers.html'">مدیریت افراد قرض‌گیرنده</button>
-        <div id="bookList"></div>
+        <div>
+            <input type="checkbox" id="showBooks" onchange="toggleBookList()">
+            <label for="showBooks" class="checkbox-label">نمایش لیست کتاب‌ها</label>
+        </div>
+        <div id="bookList" class="hidden"></div>
+
+        <!-- بخش مدیریت قرض‌گیرنده‌ها -->
+        <h2>مدیریت قرض‌گیرنده‌ها</h2>
+        <input type="text" id="newBorrowerName" placeholder="نام قرض‌گیرنده جدید">
+        <input type="text" id="newBorrowerBook" placeholder="کتاب قرض‌گرفته‌شده" oninput="suggestBooks()">
+        <div id="bookSuggestions"></div>
+        <input type="date" id="newBorrowerDueDate" placeholder="تاریخ تحویل">
+        <button onclick="addBorrower()">اضافه کردن</button>
+        <div id="borrowerList"></div>
+
         <p id="result"></p>
     </div>
 
-    <div id="passwordChangeForm">
-        <h2>تغییر رمز عبور</h2>
-        <input type="password" id="oldPassword" placeholder="رمز عبور قبلی">
-        <input type="password" id="newPassword" placeholder="رمز عبور جدید">
-        <button onclick="changePassword()">تأیید</button>
-        <button onclick="hidePasswordChange()">لغو</button>
-        <p id="passwordResult"></p>
-    </div>
-
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.min.js"></script>
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCN0XZvBkTyloHjFcONykBEyBl_gdQb4Zc",
+            authDomain: "libraryapp-6f57d.firebaseapp.com",
+            projectId: "libraryapp-6f57d",
+            storageBucket: "libraryapp-6f57d.firebasestorage.app",
+            messagingSenderId: "328447424157",
+            appId: "1:328447424157:web:74ebf69fe1207d0238c674"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         const currentAdmin = JSON.parse(localStorage.getItem("currentAdmin"));
         if (!currentAdmin) {
             window.location.href = "admin.html";
-        } else {
-            document.getElementById("adminName").textContent = currentAdmin.fullName;
         }
 
-        let books = JSON.parse(localStorage.getItem("bookList")) || [
-            "ریاضیات آسان", "ریاضی گسسته", "فارسی هفتم", "ملت عشق", 
-            "شازده کوچولو", "قدرت حال", "کیمیاگر", "هنر شفاف اندیشیدن"
-        ];
-        let activityLog = JSON.parse(localStorage.getItem("activityLog")) || [];
+        let books = [];
+        let fuse = null;
 
-        function toPersianDate(date) {
-            const persianDate = new Date(date).toLocaleDateString("fa-IR", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit"
-            }).replace(/(\d+)\/(\d+)\/(\d+)/, "$3/$2/$1");
-            return persianDate;
+        async function loadBooks() {
+            const snapshot = await db.collection("books").get();
+            books = snapshot.docs.map(doc => ({ title: doc.data().title }));
+            fuse = new Fuse(books, { keys: ['title'], threshold: 0.3 });
         }
 
-        const profile = document.querySelector(".profile");
-        const profileMenu = document.getElementById("profileMenu");
-        profile.addEventListener("click", function() {
-            profileMenu.style.display = profileMenu.style.display === "block" ? "none" : "block";
-        });
+        function suggestBooks() {
+            const query = document.getElementById("newBorrowerBook").value.trim();
+            const suggestionsElement = document.getElementById("bookSuggestions");
+            suggestionsElement.style.display = "none";
 
-        document.addEventListener("click", function(event) {
-            if (!profile.contains(event.target)) {
-                profileMenu.style.display = "none";
+            if (!query || !fuse) return;
+
+            const results = fuse.search(query);
+            if (results.length > 0) {
+                const inputRect = document.getElementById("newBorrowerBook").getBoundingClientRect();
+                suggestionsElement.style.left = `${inputRect.left}px`;
+                suggestionsElement.style.top = `${inputRect.bottom + window.scrollY}px`;
+                suggestionsElement.innerHTML = results.map(r => `<div onclick="selectBook('${r.item.title}')">${r.item.title}</div>`).join("");
+                suggestionsElement.style.display = "block";
             }
-        });
+        }
 
-        function displayBooks() {
+        function selectBook(title) {
+            document.getElementById("newBorrowerBook").value = title;
+            document.getElementById("bookSuggestions").style.display = "none";
+        }
+
+        async function displayBooks() {
             const bookListElement = document.getElementById("bookList");
-            if (books.length === 0) {
-                bookListElement.textContent = "هیچ کتابی ثبت نشده است.";
-            } else {
-                bookListElement.innerHTML = `<ul>${books.map((book, index) => 
-                    `<li>
-                        ${book}
-                        <button class="delete-btn" onclick="confirmDelete(${index})">حذف</button>
-                    </li>`
-                ).join("")}</ul>`;
+            if (!document.getElementById("showBooks").checked) {
+                bookListElement.classList.add("hidden");
+                return;
+            }
+
+            bookListElement.classList.remove("hidden");
+            bookListElement.innerHTML = "";
+            try {
+                const snapshot = await db.collection("books").get();
+                if (snapshot.empty) {
+                    bookListElement.textContent = "هیچ کتابی ثبت نشده است.";
+                } else {
+                    let html = "<ul>";
+                    snapshot.forEach(doc => {
+                        const book = doc.data().title;
+                        html += `<li>
+                            ${book}
+                            <button class="delete-btn" onclick="confirmDeleteBook('${doc.id}')">حذف</button>
+                        </li>`;
+                    });
+                    html += "</ul>";
+                    bookListElement.innerHTML = html;
+                }
+            } catch (error) {
+                bookListElement.textContent = "خطا: " + error.message;
             }
         }
 
-        function addBook() {
+        function toggleBookList() {
+            displayBooks();
+        }
+
+        async function addBook() {
             const newBook = document.getElementById("newBook").value.trim();
             const resultElement = document.getElementById("result");
 
@@ -228,88 +151,142 @@
                 return;
             }
 
-            if (books.includes(newBook)) {
-                resultElement.textContent = "❌ این کتاب قبلاً اضافه شده است!";
-                return;
+            try {
+                const bookSnapshot = await db.collection("books").where("title", "==", newBook).get();
+                if (!bookSnapshot.empty) {
+                    resultElement.textContent = "❌ این کتاب قبلاً اضافه شده است!";
+                    return;
+                }
+
+                await db.collection("books").add({
+                    title: newBook,
+                    addedBy: currentAdmin.fullName,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await db.collection("activities").add({
+                    user: currentAdmin.fullName,
+                    action: `کتاب "${newBook}" را اضافه کرد`,
+                    type: "books",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                resultElement.textContent = "✅ کتاب با موفقیت اضافه شد!";
+                document.getElementById("newBook").value = "";
+                displayBooks();
+                loadBooks();
+            } catch (error) {
+                resultElement.textContent = "❌ خطا: " + error.message;
             }
-
-            books.push(newBook);
-            localStorage.setItem("bookList", JSON.stringify(books));
-
-            const activity = {
-                admin: currentAdmin.fullName,
-                action: "add",
-                book: newBook,
-                timestamp: toPersianDate(new Date())
-            };
-            activityLog.push(activity);
-            localStorage.setItem("activityLog", JSON.stringify(activityLog));
-
-            resultElement.textContent = "✅ کتاب با موفقیت اضافه شد!";
-            document.getElementById("newBook").value = "";
-            displayBooks();
         }
 
-        function confirmDelete(index) {
-            const confirmed = confirm(`آیا مطمئن هستید که می‌خواهید کتاب "${books[index]}" را حذف کنید؟`);
+        async function confirmDeleteBook(bookId) {
+            const confirmed = confirm("آیا مطمئن هستید که می‌خواهید این کتاب را حذف کنید؟");
             if (confirmed) {
-                books.splice(index, 1);
-                localStorage.setItem("bookList", JSON.stringify(books));
+                const bookDoc = await db.collection("books").doc(bookId).get();
+                const bookTitle = bookDoc.data().title;
+                await db.collection("books").doc(bookId).delete();
+                await db.collection("activities").add({
+                    user: currentAdmin.fullName,
+                    action: `کتاب "${bookTitle}" را حذف کرد`,
+                    type: "books",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
                 displayBooks();
+                loadBooks();
                 document.getElementById("result").textContent = "✅ کتاب با موفقیت حذف شد.";
             }
         }
 
-        function logout() {
-            localStorage.removeItem("currentAdmin");
-            window.location.href = "admin.html";
+        async function displayBorrowers() {
+            const borrowerListElement = document.getElementById("borrowerList");
+            borrowerListElement.innerHTML = "";
+            try {
+                const snapshot = await db.collection("borrowers").get();
+                if (snapshot.empty) {
+                    borrowerListElement.textContent = "هیچ قرض‌گیرنده‌ای ثبت نشده است.";
+                } else {
+                    let html = "<ul>";
+                    snapshot.forEach(doc => {
+                        const borrower = doc.data();
+                        const dueDate = borrower.dueDate ? new Date(borrower.dueDate).toLocaleDateString('fa-IR') : "مشخص نشده";
+                        html += `<li>
+                            ${borrower.name} - ${borrower.book} (تحویل: ${borrower.returned ? "بله" : "خیر"}) - تاریخ تحویل: ${dueDate}
+                            ${!borrower.returned ? `<button class="return-btn" onclick="confirmReturn('${doc.id}')">تحویل داده شد</button>` : ""}
+                        </li>`;
+                    });
+                    html += "</ul>";
+                    borrowerListElement.innerHTML = html;
+                }
+            } catch (error) {
+                borrowerListElement.textContent = "خطا: " + error.message;
+            }
         }
 
-        function showPasswordChange() {
-            document.getElementById("passwordChangeForm").style.display = "block";
-            profileMenu.style.display = "none";
-        }
+        async function addBorrower() {
+            const name = document.getElementById("newBorrowerName").value.trim();
+            const book = document.getElementById("newBorrowerBook").value.trim();
+            const dueDate = document.getElementById("newBorrowerDueDate").value;
+            const resultElement = document.getElementById("result");
 
-        function hidePasswordChange() {
-            document.getElementById("passwordChangeForm").style.display = "none";
-            document.getElementById("oldPassword").value = "";
-            document.getElementById("newPassword").value = "";
-            document.getElementById("passwordResult").textContent = "";
-        }
-
-        function changePassword() {
-            const oldPassword = document.getElementById("oldPassword").value;
-            const newPassword = document.getElementById("newPassword").value;
-            const resultElement = document.getElementById("passwordResult");
-
-            if (!oldPassword || !newPassword) {
-                resultElement.textContent = "لطفاً هر دو فیلد را پر کنید!";
+            if (!name || !book || !dueDate) {
+                resultElement.textContent = "لطفاً نام، کتاب و تاریخ تحویل را وارد کنید!";
                 return;
             }
 
-            if (oldPassword !== currentAdmin.password) {
-                resultElement.textContent = "رمز عبور قبلی اشتباه است!";
-                return;
+            try {
+                await db.collection("borrowers").add({
+                    name: name,
+                    book: book,
+                    returned: false,
+                    dueDate: dueDate,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                await db.collection("activities").add({
+                    user: currentAdmin.fullName,
+                    action: `کتاب "${book}" را به "${name}" قرض داد (تاریخ تحویل: ${new Date(dueDate).toLocaleDateString('fa-IR')})`,
+                    type: "borrowers",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                resultElement.textContent = "✅ قرض‌گیرنده با موفقیت اضافه شد!";
+                document.getElementById("newBorrowerName").value = "";
+                document.getElementById("newBorrowerBook").value = "";
+                document.getElementById("newBorrowerDueDate").value = "";
+                displayBorrowers();
+            } catch (error) {
+                resultElement.textContent = "❌ خطا: " + error.message;
             }
-
-            let admins = JSON.parse(localStorage.getItem("admins"));
-            const adminIndex = admins.findIndex(a => a.username === currentAdmin.username);
-            admins[adminIndex].password = newPassword;
-            localStorage.setItem("admins", JSON.stringify(admins));
-
-            currentAdmin.password = newPassword;
-            localStorage.setItem("currentAdmin", JSON.stringify(currentAdmin));
-
-            resultElement.textContent = "✅ رمز عبور با موفقیت تغییر کرد!";
-            setTimeout(hidePasswordChange, 1000);
         }
 
+        async function confirmReturn(borrowerId) {
+            const confirmed = confirm("آیا مطمئن هستید که این کتاب تحویل داده شده است؟ این قرض‌گیرنده حذف خواهد شد.");
+            if (confirmed) {
+                const borrowerDoc = await db.collection("borrowers").doc(borrowerId).get();
+                const borrower = borrowerDoc.data();
+                await db.collection("borrowers").doc(borrowerId).delete();
+                await db.collection("activities").add({
+                    user: currentAdmin.fullName,
+                    action: `کتاب "${borrower.book}" را از "${borrower.name}" تحویل گرفت و حذف کرد`,
+                    type: "borrowers",
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                displayBorrowers();
+                document.getElementById("result").textContent = "✅ قرض‌گیرنده با موفقیت حذف شد.";
+            }
+        }
+
+        loadBooks();
         displayBooks();
+        displayBorrowers();
 
         document.getElementById("newBook").addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                addBook();
-            }
+            if (event.key === "Enter") addBook();
+        });
+
+        document.getElementById("newBorrowerDueDate").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") addBorrower();
         });
     </script>
 </body>
